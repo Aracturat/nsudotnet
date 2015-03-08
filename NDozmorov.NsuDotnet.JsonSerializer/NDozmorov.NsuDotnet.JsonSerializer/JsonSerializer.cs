@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,7 +15,12 @@ namespace NDozmorov.NsuDotnet.JsonSerializer
         {
             if (obj.GetType().IsClass == false)
             {
-                throw new Exception("Object isn't class. Can't serialize it.");
+                throw new SerializationException("Object isn't an object of a class. Can't serialize it.");
+            }
+
+            if (obj.GetType().IsSerializable == false)
+            {
+                throw new SerializationException("Object isn't serializable. Can't serialize it.");
             }
 
             return SerializeObject(obj, streamWriter);
