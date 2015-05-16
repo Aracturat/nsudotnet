@@ -128,16 +128,7 @@ namespace NDozmorov.NsuDotnet.Enigma
 
             using (var encStream = new CryptoStream(outStream, encryptor, CryptoStreamMode.Write))
             {
-                using (var reader = new StreamReader(inStream, Encoding.UTF8))
-                {
-                    using (var writer = new StreamWriter(encStream, Encoding.UTF8))
-                    {
-                        while (!reader.EndOfStream)
-                        {
-                            writer.WriteLine(reader.ReadLine());
-                        }
-                    }
-                }
+                inStream.CopyTo(encStream);
             }
         }
 
@@ -147,16 +138,7 @@ namespace NDozmorov.NsuDotnet.Enigma
             
             using (var decrStream = new CryptoStream(inStream, decryptor, CryptoStreamMode.Read))
             {
-                using (var reader = new StreamReader(decrStream, Encoding.UTF8))
-                {
-                    using (var writer = new StreamWriter(outStream, Encoding.UTF8))
-                    {
-                        while (!reader.EndOfStream)
-                        {
-                            writer.WriteLine(reader.ReadLine());
-                        }
-                    }
-                }
+                decrStream.CopyTo(outStream);
             }
         }
     }
