@@ -61,14 +61,12 @@ namespace NDozmorov.NsuDotnet.Enigma
                         throw new Exception(String.Format("Wrong argument: {0}", dir));
                 }
 
-                using (var inStream = new FileStream(inputFilename, FileMode.Open, FileAccess.Read, FileShare.None))
+                using (var inStream = new FileStream(inputFilename, FileMode.Open, FileAccess.Read))
+                using (var outStream = new FileStream(outputFilename, FileMode.OpenOrCreate, FileAccess.Write))
                 {
-                    using (var outStream = new FileStream(outputFilename, FileMode.OpenOrCreate, FileAccess.Write))
-                    {
-                        outStream.SetLength(0);
+                    outStream.SetLength(0);
                        
-                        func.Invoke(inStream, outStream, algorythm);
-                    }
+                    func.Invoke(inStream, outStream, algorythm);
                 }
             }
             catch (KeyNotFoundException e)
@@ -88,12 +86,10 @@ namespace NDozmorov.NsuDotnet.Enigma
         private static void WriteKeyFile(string keyFilename, SymmetricAlgorithm algorithm)
         {
             using (var keyStream = new FileStream(keyFilename, FileMode.OpenOrCreate, FileAccess.Write))
+            using (var keyWriter = new StreamWriter(keyStream))
             {
-                using (var keyWriter = new StreamWriter(keyStream))
-                {
-                    keyWriter.WriteLine(Convert.ToBase64String(algorithm.IV));
-                    keyWriter.WriteLine(Convert.ToBase64String(algorithm.Key));
-                }
+                keyWriter.WriteLine(Convert.ToBase64String(algorithm.IV));
+                keyWriter.WriteLine(Convert.ToBase64String(algorithm.Key));
             }
         }
 
@@ -105,20 +101,18 @@ namespace NDozmorov.NsuDotnet.Enigma
             }
 
             using (var keyStream = new FileStream(keyFilename, FileMode.Open, FileAccess.Read))
+            using (var keyReader = new StreamReader(keyStream))
             {
-                using (var keyReader = new StreamReader(keyStream))
+                string IV = keyReader.ReadLine();
+                string Key = keyReader.ReadLine();
+
+                if (IV.Length == 0 || Key.Length == 0)
                 {
-                    string IV = keyReader.ReadLine();
-                    string Key = keyReader.ReadLine();
-
-                    if (IV.Length == 0 || Key.Length == 0)
-                    {
-                        throw new Exception("Wrong Key file");
-                    }
-
-                    algorithm.IV = Convert.FromBase64String(IV);
-                    algorithm.Key = Convert.FromBase64String(Key);
+                    throw new Exception("Wrong Key file");
                 }
+
+                algorithm.IV = Convert.FromBase64String(IV);
+                algorithm.Key = Convert.FromBase64String(Key);
             }
         }
         
